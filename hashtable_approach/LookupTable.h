@@ -12,9 +12,9 @@ class LookupTable {
 public:
     static unordered_map<char,int> char_table;
     unordered_map<unsigned long long,vector<string>> dict;
-    void insert(string word);
-    unsigned long long gethash(string word);
-    set<string> lookup(string word);
+    void insert(string &word);
+    unsigned long long gethash(string &word);
+    set<string> lookup(string &word);
 };
 
 

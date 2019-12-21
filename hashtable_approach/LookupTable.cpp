@@ -31,7 +31,7 @@ unordered_map<char, int> LookupTable::char_table = {{'a', 2},
                                                     {'y', 97},
                                                     {'z', 101}};
 
-unsigned long long LookupTable::gethash(string word) {
+unsigned long long LookupTable::gethash(string &word) {
     int n = word.size();
     unsigned long long h = 1;
     for (int i = 0;i < n;i++)
@@ -41,7 +41,7 @@ unsigned long long LookupTable::gethash(string word) {
     return h;
 }
 
-void LookupTable::insert(string word)
+void LookupTable::insert(string &word)
 {
 
         unsigned long long h = gethash(word);
@@ -53,7 +53,7 @@ void LookupTable::insert(string word)
         }
 }
 typedef unsigned long long ll;
-set<string> LookupTable::lookup(string word)
+set<string> LookupTable::lookup(string &word)
 {
     set<string> ans;
     unordered_set<unsigned long long> preset;
@@ -75,7 +75,7 @@ set<string> LookupTable::lookup(string word)
             j++;
         }
         ll h = gethash(query);
-        if (preset.count(h))
+        if (preset.count(h) || query.size() < 3)
             continue;
         preset.insert(h);
         if (dict.count(h)) {
