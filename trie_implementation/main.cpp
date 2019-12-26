@@ -1,91 +1,67 @@
 #include "Trie.h"
 
+// Timing execution
 #include <chrono>
-#include <locale>
-using namespace std::chrono;
+using high_resolution_clock = chrono::high_resolution_clock;
+using time_point = chrono::time_point<chrono::high_resolution_clock>;
+#define ms_cast chrono::duration_cast<chrono::milliseconds>
 
-// STOLEN - REIMPLEMENTAION REQUIRED
-struct my_numpunct : numpunct<char> {
+// Cosmetics / Digits grouping
+// http://www.cplusplus.com/reference/locale/numpunct/grouping/
+#include <locale>
+struct _3digit_grouping : numpunct<char>
+{
     string do_grouping() const { return "\03"; }
 };
 
-vector<char> tovectorchar(string x)
+int main(int argc, char** argv)
 {
-    vector<char> v;
-    for (char c : x) v.push_back(c);
-    return v;
-}
+    if (argc != 4)
+    {
+        cout << "Exactly 3 args required: [dictionary file] [query file] [output file]" << endl;
+        return -1;
+    }
 
+    fstream file_dict(argv[1], fstream::in);
+    fstream file_query(argv[2], fstream::in);
+    fstream file_output(argv[3], fstream::out | fstream::trunc);
+    if (!file_query.is_open() || !file_output.is_open())
+    {
+        cout << "Unable to open input or output file." << endl;
+        return -1;
+    }
 
-int main()
-{
-    time_point<high_resolution_clock> start, end;
+    time_point start, end;
 
-    // STOLEN - REIMPLEMENTAION REQUIRED
-    locale loc(std::cout.getloc(), new my_numpunct);
-    cout.imbue(loc);
+    static locale l(cout.getloc(), new _3digit_grouping);
+    cout.imbue(l);
 
-    cout << "Building dictionary..." << endl;
-    start = high_resolution_clock::now();
-    Trie x("C:\\Users\\Administrator\\Desktop\\Dic.txt");
-    end = high_resolution_clock::now();
-    cout << "Dictionary built in " << (end - start).count() << " ns." << endl;
-
-    /*vector<char> query = {'a', 'l', 'g', 'o', 'r', 'i', 's', 'm' };*/
-    vector<char> query = tovectorchar("aaaabbbccccddddeeeeffffgggghhhhiiiijjkkkkllllmmmmnnnnooooopppqqrrrrsssssttttuuuuvvvwwwwxxxyyyzzzz");
-    // for (char i = 'a'; i <= 'z'; i++) query.push_back(i);
-    // for (char i = 1; i <= 11; i++) query.push_back('a');
+    string query;
+    while (!file_query.eof())
+    {
+        char c = file_query.get();
+        if (c >= 'a' && c <= 'z') query += c;
+        else if (c >= 'A' && c <= 'Z') query += tolower(c);
+    }
     cout << "Query has " << query.size() << " letters." << endl;
 
-    cout << "Searching dictionary..." << endl;
+    cout << "Building dictionary...";
+
+    start = high_resolution_clock::now();
+    Trie x(file_dict);
+    end = high_resolution_clock::now();
+    cout << " Done in " << ms_cast(end - start).count() << " ms." << endl;
+    
+
+    cout << "Searching dictionary...";
     start = high_resolution_clock::now();
     vector<string> results = x.search(query);
     end = high_resolution_clock::now();
-    cout << "Found " << results.size() << " result(s) in " << (end - start).count() << " ns." << endl;
+    
+    cout << " Found " << results.size() << " result(s) in " << ms_cast(end - start).count() << " ms." << endl;
 
-    fstream output("C:\\Users\\Administrator\\Desktop\\output.txt", fstream::out | fstream::trunc);
     for (auto i : results)
-        output << i << endl;
+        file_output << i << endl;
 
     return 0;
 }
-
-//#include <iostream>
-//#include <fstream>
-//#include <string>
-//using namespace std;
-//
-//int main()
-//{
-//    fstream file("C:\\Users\\Administrator\\Desktop\\Dic.txt", fstream::in);
-//
-//    if (!file.is_open()) exit(-1);
-//
-//    int sticky_sieve[26]  = {0};
-//
-//    while (!file.eof())
-//    {
-//        string line;
-//        getline(file, line);
-//        int sieve[26] = {0};
-//        if (!line.empty() && line.find_first_not_of(' ') != string::npos)
-//        {
-//            for (char c : line)
-//                sieve[c - 'a']++;
-//            for (int i = 0; i < 26; i++)
-//            {
-//                if (sieve[i] > sticky_sieve[i]) sticky_sieve[i] = sieve[i];
-//            }
-//        }
-//    }
-//    for (int i = 0; i < 26; i++)
-//    {
-//        for (int j = 0; j < sticky_sieve[i]; j++)
-//        {
-//            cout << (char)(i + 'a');
-//        }
-//    }
-//    cout << endl;
-//
-//    return 0;
-//}

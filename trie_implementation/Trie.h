@@ -4,8 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <iterator>
-#include <algorithm>
+#include <algorithm> // find()
 #include <unordered_set>
 using namespace std;
 
@@ -19,10 +18,12 @@ class Trie
             vector<node*> children;
         };
         node* root = new node;
-        void _search(vector<char> letters, node* root, string temp, vector<string>& results);
+
+        void _remove_duplicate_char(string& v);
+        void _search(string letters, node* root, string temp, vector<string>& results);
 
     public:
-        Trie(string filepath);      // build from dict file
+        Trie(fstream& file);
         void insert(string word);
-        vector<string> search(const vector<char>& letters);
+        vector<string> search(const string& letters);
 };
